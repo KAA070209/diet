@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Olahraga</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body style="background:#f4f6f9">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand">💪 Diet Planner</a>
+
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a class="nav-link" href="{{ url_for('exercises') }}">Olahraga</a>
+            <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- USER -->
+    <div class="card p-3 mb-4">
+        <h4>Rekomendasi Olahraga Untuk {{ user.name }}</h4>
+        <p>Tujuan : <b>{{ user.tujuan }}</b></p>
+    </div>
+
+
+    <!-- ================= REKOMENDASI ================= -->
+    <div class="card p-4 mb-4">
+
+        <h5>Rekomendasi Olahraga</h5>
+
+        <div class="row">
+
+            {% for ex in exercises %}
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+
+                        <h5>{{ ex.nama_olahraga }}</h5>
+
+                        <p>Kalori / menit : {{ ex.kalori_per_menit }}</p>
+
+                        <input type="number" 
+                               id="durasi{{ ex.id_olahraga }}"
+                               class="form-control mb-2"
+                               placeholder="Durasi menit">
+
+                        <button class="btn btn-success w-100"
+                                onclick="tambahOlahraga({{ ex.id_olahraga }})">
+                            Tambah
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= CATATAN HARI INI ================= -->
+    <div class="card p-4">
+
+        <h5>Catatan Olahraga Hari Ini</h5>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Olahraga</th>
+                    <th>Durasi</th>
+                    <th>Kalori Terbakar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for t in today_exercises %}
+                <tr>
+                    <td>{{ t.nama_olahraga }}</td>
+                    <td>{{ t.durasi_menit }} menit</td>
+                    <td>{{ t.kalori_terbakar }} kcal</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">Belum ada olahraga hari ini</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+function tambahOlahraga(id){
+
+    let durasi = document.getElementById("durasi"+id).value;
+
+    fetch("/add_exercise", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            id_olahraga:id,
+            durasi:durasi
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        location.reload();
+    })
+}
+</script>
+
+</body>
+</html>

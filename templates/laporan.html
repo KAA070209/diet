@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="report" class="tab-content">
+                <div class="form-section">
+                    <h2>Laporan Progress 7 Hari</h2>
+                    <div id="report-content">
+                        <p class="alert alert-info">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load data when switching tabs
+            if (tabName === 'dashboard') loadDashboard();
+            if (tabName === 'food') loadFoodData();
+            if (tabName === 'exercise') loadExerciseData();
+            if (tabName === 'water') loadWaterData();
+            if (tabName === 'report') loadReportData();
+        }
+        
+        // Load food options
+        async function loadFoodData() {
+            try {
+                const response = await fetch('/api/foods');
+                const foods = await response.json();
+                
+                const select = document.getElementById('food-select');
+                select.innerHTML = '<option value="">-- Pilih Makanan --</option>';
+                foods.forEach(food => {
+                    select.innerHTML += `<option value="${food.id_makanan}">
+                        ${food.nama_makanan} (${food.kalori} kkal/${food.porsi})
+                    </option>`;
+                });
+                
+                // Load meal list
+                const mealResponse = await fetch('/api/meals/1/' + new Date().toISOString().split('T')[0]);
+                const meals = await mealResponse.json();
+                
+                const mealList = document.getElementById('meal-list');
+                if (meals.length === 0) {
+                    mealList.innerHTML = '<p class="alert alert-info">Belum ada catatan makan hari ini</p>';
+                } else {
+                    mealList.innerHTML = '<ul class="meal-list">' + meals.map(meal => `
+                        <li class="meal-item">
+                            <strong>${meal.nama_makanan}</strong>
+                            <div class="nutrition-info">
+                                <span>⏰ ${meal.waktu_makan}</span>
+                                <span>📦 ${meal.jumlah_porsi} porsi</span>
+                                <span>🔥 ${Math.round(meal.total_kalori)} kkal</span>
+                                <span>🥩 P: ${meal.total_protein}g</span>
+                                <span>🥑 L: ${meal.total_lemak}g</span>
+                                <span>🍚 K: ${meal.total_karbo}g</span>
+                            </div>
+                        </li>
+                    `).join('') + '</ul>';
+                }
+            } catch (error) {
+                console.error('Error loading food data:', error);
+            }
+        }
+        
+        // Load exercise options
+        async function loadExerciseData() {
+            try {
+                const response = await fetch('/api/exercises');
+                const exercises = await response.json();
+                
+                const select = document.getElementById('exercise-select');
+                select.innerHTML = '<option value="">-- Pilih Olahraga --</option>';
+                exercises.forEach(ex => {
+                    select.innerHTML += `<option value="${ex.id_olahraga}">
+                        ${ex.nama_olahraga} (${ex.kalori_per_menit} kkal/menit)
+                    </option>`;
+                });
+                
+                // Load exercise list
+                const exResponse = await fetch('/api/exercise_logs/1/' + new Date().toISOString().split('T')[0]);
+                const exLogs = await exResponse.json();
+                
+                const exList = document.getElementById('exercise-list');
+                if (exLogs.length === 0) {
+                    exList.innerHTML = '<p class="alert alert-info">Belum ada catatan olahraga hari ini</p>';
+                } else {
+                    const totalBurned = exLogs.reduce((sum, ex) => sum + ex.kalori_terbakar, 0);
+                    exList.innerHTML = `
+                        <div class="stat-card">
+                            <div class="label">Total Kalori Terbakar</div>
+                            <div class="value">${totalBurned}</div>
+                            <div class="label">kkal</div>
+                        </div>
+                        <ul class="exercise-list">
+                    ` + exLogs.map(ex => `
+                        <li class="exercise-item">
+                            <strong>${ex.nama_olahraga}</strong>
+                            <div class="nutrition-info">
+                                <span>⏱️ ${ex.durasi_menit} menit</span>
+                                <span>🔥 ${ex.kalori_terbakar} kkal terbakar</span>
+                            </div>
+                        </li>
+                    `).join('') + '</ul>';
+                }
+            } catch (error) {
+                console.error('Error loading exercise data:', error);
+            }
+        }
+        
+        // Load water data
+        async function loadWaterData() {
+            try {
+                const response = await fetch('/api/water/1/' + new Date().toISOString().split('T')[0]);
+                const data = await response.json();
+                
+                const waterProgress = document.getElementById('water-progress');
+                const percentage = Math.min((data.total_ml / 2000) * 100, 100);
+                
+                waterProgress.innerHTML = `
+                    <div class="stat-card">
+                        <div class="label">Asupan Air Hari Ini</div>
+                        <div class="value">${(data.total_ml / 1000).toFixed(1)}L</div>
+                        <div class="label">dari 2.0L target</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%">${Math.round(percentage)}%</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading water data:', error);
+            }
+        }
+        
+        // Load dashboard
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/dashboard/1/' + new Date().toISOString().split('T')[0]);
+                const data = await response.json();
+                
+                const dashboard = document.getElementById('dashboard-content');
+                dashboard.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Kalori</div>
+                            <div class="value">${data.nutrition.kalori}</div>
+                            <div class="label">dari ${data.targets.target_kalori} kkal</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Protein</div>
+                            <div class="value">${data.nutrition.protein}g</div>
+                            <div class="label">dari ${data.targets.target_protein}g</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Karbohidrat</div>
+                            <div class="value">${data.nutrition.karbo}g</div>
+                            <div class="label">dari ${data.targets.target_karbo}g</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Lemak</div>
+                            <div class="value">${data.nutrition.lemak}g</div>
+                            <div class="label">dari ${data.targets.target_lemak}g</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Progress Harian</h3>
+                    <div class="form-group">
+                        <label>Kalori (${Math.round((data.nutrition.kalori / data.targets.target_kalori) * 100)}%)</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((data.nutrition.kalori / data.targets.target_kalori) * 100, 100)}%">
+                                ${data.nutrition.kalori}/${data.targets.target_kalori} kkal
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Protein (${Math.round((data.nutrition.protein / data.targets.target_protein) * 100)}%)</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((data.nutrition.protein / data.targets.target_protein) * 100, 100)}%">
+                                ${data.nutrition.protein}/${data.targets.target_protein}g
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Karbohidrat (${Math.round((data.nutrition.karbo / data.targets.target_karbo) * 100)}%)</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((data.nutrition.karbo / data.targets.target_karbo) * 100, 100)}%">
+                                ${data.nutrition.karbo}/${data.targets.target_karbo}g
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Lemak (${Math.round((data.nutrition.lemak / data.targets.target_lemak) * 100)}%)</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((data.nutrition.lemak / data.targets.target_lemak) * 100, 100)}%">
+                                ${data.nutrition.lemak}/${data.targets.target_lemak}g
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid" style="margin-top: 30px;">
+                        <div class="stat-card">
+                            <div class="label">BMI</div>
+                            <div class="value">${data.bmi}</div>
+                            <div class="label">${data.bmi_status}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Kalori Terbakar</div>
+                            <div class="value">${data.exercise_calories}</div>
+                            <div class="label">kkal dari olahraga</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Asupan Air</div>
+                            <div class="value">${(data.water_intake / 1000).toFixed(1)}L</div>
+                            <div class="label">dari 2.0L</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // Load report data
+        async function loadReportData() {
+            try {
+                const response = await fetch('/api/report/1/7');
+                const data = await response.json();
+                
+                const report = document.getElementById('report-content');
+                report.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Rata-rata Kalori</div>
+                            <div class="value">${data.averages.kalori}</div>
+                            <div class="label">kkal/hari</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Rata-rata Protein</div>
+                            <div class="value">${data.averages.protein}g</div>
+                            <div class="label">per hari</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Rata-rata Karbo</div>
+                            <div class="value">${data.averages.karbo}g</div>
+                            <div class="label">per hari</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Rata-rata Lemak</div>
+                            <div class="value">${data.averages.lemak}g</div>
+                            <div class="label">per hari</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Riwayat 7 Hari Terakhir</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Kalori</th>
+                                <th>Protein</th>
+                                <th>Karbo</th>
+                                <th>Lemak</th>
+                                <th>Olahraga</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.daily_data.map(day => `
+                                <tr>
+                                    <td>${day.tanggal}</td>
+                                    <td>${day.kalori} kkal</td>
+                                    <td>${day.protein}g</td>
+                                    <td>${day.karbo}g</td>
+                                    <td>${day.lemak}g</td>
+                                    <td>${day.olahraga} kkal</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading report:', error);
+            }
+        }
+        
+        // Initial load
+        setTimeout(() => {
+            loadFoodData();
+        }, 500);
+    </script>
+</body>
+</html>
+</body>
+</html>

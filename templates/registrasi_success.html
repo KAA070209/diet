@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrasi Berhasil</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+
+    <!-- Success Alert -->
+    <div class="alert alert-success text-center shadow-sm">
+        <h3>✅ Registrasi Berhasil!</h3>
+        <p>Selamat! Berikut rekomendasi untuk kamu.</p>
+    </div>
+
+    <!-- Rekomendasi Makanan -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">🍛 Rekomendasi Makanan</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                {% for food in foods %}
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+
+                            <h5 class="card-title">{{ food.nama_makanan }}</h5>
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Kalori : {{ food.kalori }} kcal</li>
+                                <li class="list-group-item">Protein : {{ food.protein }} g</li>
+                                <li class="list-group-item">Lemak : {{ food.lemak }} g</li>
+                                <li class="list-group-item">Karbo : {{ food.karbo }} g</li>
+                                <li class="list-group-item">Porsi : {{ food.porsi }}</li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Rekomendasi Olahraga -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">🏃 Rekomendasi Olahraga</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                {% for ex in exercises %}
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+
+                            <h5>{{ ex.nama_olahraga }}</h5>
+                            <p class="text-muted">
+                                🔥 {{ ex.kalori_per_menit }} kcal / menit
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Tombol Aksi -->
+    <div class="text-center">
+        <a href="/login" class="btn btn-primary px-4">Login Sekarang</a>
+    </div>
+
+</div>
+
+</body>
+</html>

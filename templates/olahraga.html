@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perencanaan Diet Dan Nutrisi</title>
+</head>
+<body>
+
+<div id="exercise" class="tab-content">
+    <div class="form-section">
+        <h2>Tambah Catatan Olahraga</h2>
+
+        <form method="POST" action="/api/add_exercise">
+            <input type="hidden" name="user_id" value="1">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Jenis Olahraga:</label>
+                    <select name="id_olahraga" required>
+                        <option value="">-- Pilih Olahraga --</option>
+
+                        {% for olahraga in exercises %}
+                        <option value="{{ olahraga.id_olahraga }}">
+                            {{ olahraga.nama_olahraga }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Durasi (menit):</label>
+                    <input type="number" name="durasi_menit" min="1" value="30" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-full">
+                Tambah Olahraga
+            </button>
+        </form>
+
+        <h2 style="margin-top: 40px;">Catatan Olahraga Hari Ini</h2>
+        <div id="exercise-list">
+            <p class="alert alert-info">Belum ada data olahraga</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

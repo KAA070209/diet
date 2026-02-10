@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Diet Planner</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        .navbar {
+            background: #2c3e50;
+        }
+
+        .navbar a {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .card-custom {
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            height: 22px;
+        }
+
+        .btn-edit {
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold">🍏 Diet Planner</a>
+
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="{{ url_for('dashboard', user_id=user.id) }}">Dashboard</a>
+            <a class="nav-link" href="/foods">Catatan Makan</a>
+            <a class="nav-link" href="/exercises">Olahraga</a>
+            <a class="nav-link" href="/water">Air</a>
+            <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container mt-4">
+
+    <!-- ================= USER INFO ================= -->
+    <div class="card card-custom p-4 mb-4">
+
+        <button class="btn btn-warning btn-sm btn-edit"
+                data-bs-toggle="modal"
+                data-bs-target="#editProfileModal">
+            ✏ Edit Profil
+        </button>
+
+        <h4>Halo, {{ user.name }} 👋</h4>
+        <p>Email : {{ user.email }}</p>
+        <p>Berat Badan : <b>{{ user.berat_badan }} kg</b></p>
+        <p>Tujuan : <b>{{ user.tujuan|capitalize }}</b></p>
+        <p>Tingkat Aktivitas : <b>{{ user.tingkat_aktivitas|capitalize }}</b></p>
+
+    </div>
+
+
+    <!-- ================= BMI ================= -->
+    <div class="card card-custom p-4 mb-4">
+
+        <h5>BMI Anda</h5>
+
+        <h2>{{ bmi }}</h2>
+
+        <span class="badge 
+        {% if bmi_status == 'Normal' %}
+            bg-success
+        {% elif bmi_status == 'Underweight' %}
+            bg-warning
+        {% else %}
+            bg-danger
+        {% endif %}
+        ">
+            {{ bmi_status }}
+        </span>
+
+    </div>
+
+
+    <!-- ================= TARGET NUTRISI ================= -->
+    <div class="card card-custom p-4 mb-4">
+
+        <h5>Target Nutrisi Harian</h5>
+
+        <div class="row text-center mt-3">
+
+            <div class="col-md-3">
+                <div class="bg-success text-white p-3 rounded">
+                    <h6>Kalori</h6>
+                    <h4>{{ targets.target_kalori }} kcal</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="bg-primary text-white p-3 rounded">
+                    <h6>Protein</h6>
+                    <h4>{{ targets.target_protein }} g</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="bg-warning text-white p-3 rounded">
+                    <h6>Karbo</h6>
+                    <h4>{{ targets.target_karbo }} g</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="bg-info text-white p-3 rounded">
+                    <h6>Lemak</h6>
+                    <h4>{{ targets.target_lemak }} g</h4>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= PROGRESS ================= -->
+    <div class="card card-custom p-4">
+
+        <h5>Progress Konsumsi Hari Ini</h5>
+
+        <p>Kalori</p>
+        <div class="progress mb-3">
+            <div class="progress-bar bg-success"
+                 style="width: {{ progress.kalori }}%">
+                {{ progress.kalori }}%
+            </div>
+        </div>
+
+        <p>Protein</p>
+        <div class="progress mb-3">
+            <div class="progress-bar bg-primary"
+                 style="width: {{ progress.protein }}%">
+                {{ progress.protein }}%
+            </div>
+        </div>
+
+        <p>Karbohidrat</p>
+        <div class="progress mb-3">
+            <div class="progress-bar bg-warning"
+                 style="width: {{ progress.karbo }}%">
+                {{ progress.karbo }}%
+            </div>
+        </div>
+
+        <p>Lemak</p>
+        <div class="progress">
+            <div class="progress-bar bg-info"
+                 style="width: {{ progress.lemak }}%">
+                {{ progress.lemak }}%
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL EDIT PROFILE ================= -->
+<div class="modal fade" id="editProfileModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="POST" action="/update_profile">
+
+                <div class="modal-header">
+                    <h5>Edit Profil</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Berat badan -->
+                    <label>Berat Badan (kg)</label>
+                    <input type="number"
+                           name="berat_badan"
+                           class="form-control mb-3"
+                           value="{{ user.berat_badan }}"
+                           required>
+
+                    <!-- Tujuan Diet -->
+                    <label>Tujuan Diet</label>
+                    <select name="tujuan" class="form-control mb-3">
+                        <option value="cutting" {% if user.tujuan == 'cutting' %}selected{% endif %}>Menurunkan Berat</option>
+                        <option value="bulking" {% if user.tujuan == 'bulking' %}selected{% endif %}>Menambah Berat</option>
+                        <option value="maintain" {% if user.tujuan == 'maintain' %}selected{% endif %}>Menjaga Berat</option>
+                    </select>
+
+                    <!-- Aktivitas -->
+                    <label>Tingkat Aktivitas</label>
+                    <select name="tingkat_aktivitas" class="form-control">
+
+                        <option value="rendah" {% if user.tingkat_aktivitas == 'rendah' %}selected{% endif %}>
+                            Rendah
+                        </option>
+
+                        <option value="sedang" {% if user.tingkat_aktivitas == 'sedang' %}selected{% endif %}>
+                            Sedang
+                        </option>
+
+                        <option value="tinggi" {% if user.tingkat_aktivitas == 'tinggi' %}selected{% endif %}>
+                            Tinggi
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button class="btn btn-success">
+                        Simpan Perubahan
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

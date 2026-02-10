@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perencanaan Diet Dan Nutrisi</title>
+</head>
+<body>
+    <div id="food" class="tab-content">
+                <div class="form-section">
+                    <h2>Tambah Catatan Makan</h2>
+                    <form method="POST" action="/api/add_meal">
+                        <input type="hidden" name="user_id" value="1">
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Waktu Makan:</label>
+                                <select name="waktu_makan" required>
+                                    <option value="sarapan">Sarapan</option>
+                                    <option value="siang">Makan Siang</option>
+                                    <option value="malam">Makan Malam</option>
+                                    <option value="camilan">Camilan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Jumlah Porsi:</label>
+                                <input type="number" name="jumlah_porsi" step="0.1" min="0.1" value="1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Pilih Makanan:</label>
+                            <select name="id_makanan" required id="food-select">
+                                <option value="">-- Pilih Makanan --</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-full">Tambah Makanan</button>
+                    </form>
+                    
+                    <h2 style="margin-top: 40px;">Catatan Makan Hari Ini</h2>
+                    <div id="meal-list">
+                        <p class="alert alert-info">Loading...</p>
+                    </div>
+                </div>
+            </div>
+</body>
+</html>
